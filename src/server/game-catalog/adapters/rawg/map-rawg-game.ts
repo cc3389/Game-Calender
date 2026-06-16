@@ -1,5 +1,6 @@
 import type { GameListItem } from "@/entities/game/types";
 import { pickChineseFromSlashName } from "./display-name-locale";
+import { detectReleaseEditionFromRawg } from "./detect-release-edition";
 import type { RawgGame } from "./rawg.schema";
 
 export function mapRawgGameToListItem(game: RawgGame): GameListItem | null {
@@ -21,6 +22,7 @@ export function mapRawgGameToListItem(game: RawgGame): GameListItem | null {
     name: slashName,
     nameOriginal: slashName !== rawName ? rawName : undefined,
     released: game.released,
+    releaseEdition: detectReleaseEditionFromRawg(game),
     coverUrl: game.background_image ?? null,
     platformNames,
     storeLinks,

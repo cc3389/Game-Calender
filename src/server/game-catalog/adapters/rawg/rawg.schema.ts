@@ -14,6 +14,11 @@ const storeEntrySchema = z.object({
   url: z.string().optional(),
 });
 
+const tagEntrySchema = z.object({
+  slug: z.string(),
+  name: z.string().optional(),
+});
+
 export const rawgGameSchema = z.object({
   id: z.number(),
   name: z.string(),
@@ -21,6 +26,7 @@ export const rawgGameSchema = z.object({
   background_image: z.string().nullable().optional(),
   platforms: z.array(platformEntrySchema).nullish(),
   stores: z.array(storeEntrySchema).nullish(),
+  tags: z.array(tagEntrySchema).nullish(),
 });
 
 export const rawgGamesResponseSchema = z.object({

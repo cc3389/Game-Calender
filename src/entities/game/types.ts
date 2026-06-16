@@ -1,5 +1,7 @@
 /** 领域模型：UI 与 API 对外只依赖此形状，与 RAWG/Twitch 等无关 */
 
+import type { ReleaseEdition } from "./release-edition";
+
 export type GameStoreLink = {
   name: string;
   url: string;
@@ -12,6 +14,8 @@ export type GameListItem = {
   /** 数据源原始英文名，与 name 不同时可在详情中展示 */
   nameOriginal?: string;
   released: string;
+  /** 当前条目在数据源中是否属于抢先体验发售 */
+  releaseEdition: ReleaseEdition;
   coverUrl: string | null;
   platformNames: string[];
   storeLinks: GameStoreLink[];

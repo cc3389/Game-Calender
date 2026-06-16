@@ -1,18 +1,87 @@
-# 游戏发售日历
+# 游戏发售日历（Game Calender）
 
-各平台游戏发售时间月历视图。默认通过 **RAWG** 拉取数据；服务端采用 **防腐层（GameCatalogPort）**，便于切换 Twitch/IGDB 等其它数据源，而无需改动前端与 `/api/games`。
+跨平台游戏发售时间月历 Web 应用：按月浏览 PC / PlayStation / Xbox / Switch 等平台的新作发售日，支持平台筛选、中文译名、游戏详情（介绍、标签、截图与预告片）。
+
+数据默认来自 [RAWG API](https://rawg.io/apidocs)，中文名与部分媒体内容通过 Steam 商店 API 增强。服务端采用**防腐层**，便于日后替换为 Twitch/IGDB 等数据源，而无需改动前端。
+
+---
+
+## 功能概览
+
+| 模块 | 说明 |
+|------|------|
+| 月历视图 | 按日展示发售游戏；平台色点标识；EA 条目带 **EA** 标记 |
+| 月份导航 | 上/下月、回到今天；Popover 年月选择器快速跳转 |
+| 平台筛选 | PC、PS5、PS4、Xbox Series、Xbox One、Switch 等（RAWG 平台 ID） |
+| 游戏详情 | 发售日、平台、商店链接；中英文介绍；类型标签 |
+| 媒体轮播 | RAWG 截图 + Steam 截图/预告；HLS 视频播放（hls.js） |
+| 全屏看图 | Portal 全屏预览，左右切换截图，键盘 ← → / Esc |
+| 中文名称 | 可选 `GAME_NAME_LOCALE=zh`：组合标题解析 + Steam 简中店名匹配 |
+
+---
 
 ## 技术栈
 
-- Next.js (App Router) + React + TypeScript
-- Tailwind CSS 4
-- TanStack Query
-- date-fns
+- **框架**：Next.js 16（App Router）、React 19、TypeScript
+- **样式**：Tailwind CSS 4
+- **数据**：TanStack Query、date-fns、Zod
+- **UI**：Radix Dialog / Popover、hls.js
+- **数据源**：RAWG（列表与详情子资源）、Steam（简中文案、预告 HLS、截图补全）
+
+---
+
+## 项目结构
+
+```
+src/
+├── app/                    # 路由与 API
+│   ├── page.tsx            # 首页（日历）
+│   └── api/games/          # GET 按月列表、GET /:id 详情媒体
+├── entities/game/          # 领域类型（GameListItem、详情 DTO）
+├── features/               # 按功能划分 UI
+│   ├── calendar/           # 月历、工具栏、年月选择
+│   ├── game-detail/        # 详情弹窗、媒体轮播、HLS 播放器
+│   └── platform-filter/    # 平台筛选与图例
+├── server/game-catalog/    # 防腐层与 RAWG/Twitch 适配器
+└── shared/                 # API 客户端、平台配置、通用组件
+```
+
+---
+
+## 架构与数据流
+
+### 发售列表
+
+```
+浏览器  →  GET /api/games?month=YYYY-MM&platforms=…
+         →  getGameCatalogPort()
+         →  RawgGameCatalogAdapter.listReleasesByMonth()
+         →  GameListItem[]（统一领域模型）
+```
+
+### 游戏详情（懒加载）
+
+```
+详情弹窗打开  →  GET /api/games/:id
+              →  GameCatalogPort.getGameDetail()
+              →  RAWG 详情 / 截图 / 视频 + Steam 简中介绍与媒体补全
+```
+
+### 防腐层
+
+- 端口：[`src/server/game-catalog/port.ts`](src/server/game-catalog/port.ts)（`listReleasesByMonth`、`getGameDetail`）
+- 工厂：[`src/server/game-catalog/factory.ts`](src/server/game-catalog/factory.ts)（`GAME_CATALOG_PROVIDER`）
+- RAWG：[`src/server/game-catalog/adapters/rawg/`](src/server/game-catalog/adapters/rawg/)
+- Twitch 占位：[`src/server/game-catalog/adapters/twitch/`](src/server/game-catalog/adapters/twitch/)
+
+扩展新数据源：实现 `GameCatalogPort` → 在 `factory.ts` 注册 → 设置环境变量即可。
+
+---
 
 ## 快速开始
 
-1. 在 [RAWG API](https://rawg.io/apidocs) 注册并创建 API Key。
-2. 复制环境变量模板并填写 Key：
+1. 在 [RAWG](https://rawg.io/apidocs) 注册并创建 API Key。
+2. 复制环境变量并填写 Key：
 
    ```bash
    cp .env.example .env.local
@@ -25,7 +94,13 @@
    npm run dev
    ```
 
-4. 浏览器打开 [http://localhost:3000](http://localhost:3000)。
+4. 打开 [http://localhost:3000](http://localhost:3000)。
+
+### 局域网开发
+
+`npm run dev` 已绑定 `0.0.0.0`。Next.js 16 对 HMR 有跨域限制，本项目在 [`next.config.ts`](next.config.ts) 中放行常见内网段；仍失败时可设置 `DEV_ALLOWED_ORIGINS=你的IP` 并重启 dev。详见下方环境变量表。
+
+---
 
 ## 环境变量
 
@@ -33,53 +108,35 @@
 |------|------|
 | `RAWG_API_KEY` | RAWG 密钥（`GAME_CATALOG_PROVIDER=rawg` 时必填） |
 | `GAME_CATALOG_PROVIDER` | `rawg`（默认）或 `twitch`（占位，未实现） |
-| `GAME_NAME_LOCALE` | `zh`（默认）：解析斜杠内中文，并通过 Steam 商店搜索匹配简中译名；`en` 保持 RAWG 英文名 |
+| `GAME_NAME_LOCALE` | `zh`（默认）：尝试中文展示名；`en` 保持 RAWG 英文 |
+| `DEV_ALLOWED_ORIGINS` | 开发模式额外允许的 HMR 来源主机名，逗号分隔 |
 
-## 中文名称说明
+---
 
-RAWG 列表接口以英文为主。默认 `GAME_NAME_LOCALE=zh` 时会：
+## 数据与限制说明
 
-1. 从 `English / 中文` 这类组合标题中提取中文；
-2. 用 Steam 商店搜索核对 appId 后采用简中商店名（如「艾尔登法环」）。
+- **RAWG**：按月 `dates` 查询；列表响应经 Zod 校验；服务端 `fetch` 缓存约 1 小时。
+- **中文名**：RAWG 以英文为主；Steam 搜索用于译名，无匹配时仍为英文。
+- **EA 标识**：依据 RAWG `early-access` 等标签识别，日历上显示 **EA**，详情中显示「抢先体验 / 正式版」。
+- **视频**：许多条目 RAWG 无 `/movies`；有 Steam 匹配时会拉取 HLS 预告。无 Steam 或无媒体时仅展示封面/截图。
+- **密钥安全**：`RAWG_API_KEY` 仅存在于服务端 Route/Adapter，不暴露给浏览器。
 
-无官方中文译名的游戏仍会显示英文。详情弹窗在名称与原文不同时会展示英文原名。
-
-## 架构：防腐层
-
-```
-UI / fetchGamesByMonth
-        ↓
-  GET /api/games
-        ↓
-  getGameCatalogPort()  ← GAME_CATALOG_PROVIDER
-        ↓
-  GameCatalogPort.listReleasesByMonth()
-        ↓
-  RawgGameCatalogAdapter | TwitchGameCatalogAdapter …
-        ↓
-  GameListItem[]（领域模型）
-```
-
-- 端口定义：[`src/server/game-catalog/port.ts`](src/server/game-catalog/port.ts)
-- 工厂注册：[`src/server/game-catalog/factory.ts`](src/server/game-catalog/factory.ts)
-- RAWG 实现：[`src/server/game-catalog/adapters/rawg/`](src/server/game-catalog/adapters/rawg/)
-- Twitch 占位：[`src/server/game-catalog/adapters/twitch/twitch-game-catalog.adapter.ts`](src/server/game-catalog/adapters/twitch/twitch-game-catalog.adapter.ts)
-
-新增数据源步骤：
-
-1. 在 `adapters/<provider>/` 实现 `GameCatalogPort`，将第三方响应映射为 `GameListItem`。
-2. 在 `factory.ts` 的 `providers` 中注册。
-3. 设置 `GAME_CATALOG_PROVIDER=<id>`。
+---
 
 ## 脚本
 
-- `npm run dev` — 开发服务器
-- `npm run build` — 生产构建
-- `npm run start` — 生产运行
-- `npm run lint` — ESLint
-- `npm run typecheck` — TypeScript 检查
+| 命令 | 说明 |
+|------|------|
+| `npm run dev` | 开发服务器（`0.0.0.0:3000`） |
+| `npm run build` | 生产构建 |
+| `npm run start` | 生产运行 |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript 检查（`tsc --noEmit`） |
 
-## 说明
+---
 
-- API Key 仅存在于服务端 Route / Adapter，不会暴露给浏览器。
-- RAWG 列表按月份缓存约 1 小时（`fetch` revalidate）。
+## 许可证与致谢
+
+- 游戏数据：[RAWG.io](https://rawg.io/)
+- 部分中文与媒体：[Steam](https://store.steampowered.com/) 公开商店接口  
+使用本项目时请遵守各 API 服务条款与署名要求。

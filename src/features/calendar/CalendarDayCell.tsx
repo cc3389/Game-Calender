@@ -70,6 +70,11 @@ export function CalendarDayCell({
                 className="mt-1.5"
               />
               <span className="line-clamp-2 min-w-0 flex-1 text-[10px] leading-snug text-zinc-200 group-hover:text-white">
+                {game.releaseEdition === "early_access" ? (
+                  <span className="mr-0.5 font-semibold text-amber-400/90">
+                    EA
+                  </span>
+                ) : null}
                 {game.name}
               </span>
             </button>

@@ -1,3 +1,4 @@
+import type { GameDetailMedia } from "@/entities/game/detail-types";
 import type { GameListItem } from "@/entities/game/types";
 
 /** 防腐层入参：与具体第三方 API 参数解耦 */
@@ -13,4 +14,5 @@ export type ListReleasesQuery = {
 export interface GameCatalogPort {
   readonly providerId: string;
   listReleasesByMonth(query: ListReleasesQuery): Promise<GameListItem[]>;
+  getGameDetail(gameId: string): Promise<GameDetailMedia>;
 }
