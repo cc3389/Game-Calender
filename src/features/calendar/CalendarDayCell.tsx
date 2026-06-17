@@ -11,6 +11,7 @@ type CalendarDayCellProps = {
   date: Date;
   month: Date;
   games: GameListItem[];
+  wishlistIds?: Set<string>;
   onSelectGame: (game: GameListItem) => void;
   onExpandDay?: (date: string, games: GameListItem[]) => void;
 };
@@ -19,6 +20,7 @@ export function CalendarDayCell({
   date,
   month,
   games,
+  wishlistIds,
   onSelectGame,
   onExpandDay,
 }: CalendarDayCellProps) {
@@ -55,12 +57,17 @@ export function CalendarDayCell({
         ) : null}
       </div>
       <ul className="flex flex-1 flex-col gap-0.5 overflow-hidden">
-        {visible.map((game) => (
+        {visible.map((game) => {
+          const watched = wishlistIds?.has(game.id);
+          return (
           <li key={game.id}>
             <button
               type="button"
               onClick={() => onSelectGame(game)}
-              className="group flex w-full items-start gap-1 rounded px-0.5 py-px text-left hover:bg-white/5"
+              className={cn(
+                "group flex w-full items-start gap-1 rounded px-0.5 py-px text-left hover:bg-white/5",
+                watched && "bg-amber-500/10 ring-1 ring-amber-500/30",
+              )}
               title={`${game.name} · ${game.platformNames.join(", ") || "平台未知"}`}
             >
               <PlatformBadgeGroup
@@ -70,6 +77,11 @@ export function CalendarDayCell({
                 className="mt-1.5"
               />
               <span className="line-clamp-2 min-w-0 flex-1 text-[10px] leading-snug text-zinc-200 group-hover:text-white">
+                {watched ? (
+                  <span className="mr-0.5 text-amber-400" aria-hidden>
+                    ★
+                  </span>
+                ) : null}
                 {game.releaseEdition === "early_access" ? (
                   <span className="mr-0.5 font-semibold text-amber-400/90">
                     EA
@@ -79,7 +91,8 @@ export function CalendarDayCell({
               </span>
             </button>
           </li>
-        ))}
+          );
+        })}
       </ul>
     </div>
   );

@@ -20,6 +20,7 @@ const WEEKDAYS = ["一", "二", "三", "四", "五", "六", "日"];
 type CalendarMonthProps = {
   viewDate: Date;
   games: GameListItem[];
+  wishlistIds?: Set<string>;
   onSelectGame: (game: GameListItem) => void;
   onExpandDay: (dateKey: string, games: GameListItem[]) => void;
 };
@@ -27,6 +28,7 @@ type CalendarMonthProps = {
 export function CalendarMonth({
   viewDate,
   games,
+  wishlistIds,
   onSelectGame,
   onExpandDay,
 }: CalendarMonthProps) {
@@ -61,6 +63,7 @@ export function CalendarMonth({
               date={day}
               month={viewDate}
               games={dayGames}
+              wishlistIds={wishlistIds}
               onSelectGame={onSelectGame}
               onExpandDay={(dateKey, list) => onExpandDay(dateKey, list)}
             />

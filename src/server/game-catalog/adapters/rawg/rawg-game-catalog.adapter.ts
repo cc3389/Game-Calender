@@ -1,9 +1,13 @@
 import type { GameListItem } from "@/entities/game/types";
 import { GameCatalogConfigError } from "../../errors";
-import type { GameCatalogPort, ListReleasesQuery } from "../../port";
+import type { GameCatalogPort, ListReleasesQuery, SearchGamesQuery } from "../../port";
 import { buildRawgGameDetail } from "./build-rawg-game-detail";
 import { shouldLocalizeNamesToZh } from "./display-name-locale";
-import { fetchRawgGamesForMonth } from "./rawg-api.client";
+import {
+  fetchRawgGameById,
+  fetchRawgGamesForMonth,
+  fetchRawgGamesSearch,
+} from "./rawg-api.client";
 import { mapRawgGameToListItem } from "./map-rawg-game";
 import { applyChineseDisplayNames } from "./resolve-zh-display-name";
 
@@ -38,6 +42,43 @@ export class RawgGameCatalogAdapter implements GameCatalogPort {
     }
 
     return games;
+  }
+
+  async searchGames(query: SearchGamesQuery) {
+    const apiKey = requireRawgKey();
+    const limit = query.limit ?? 20;
+    const rawGames = await fetchRawgGamesSearch(
+      query.query,
+      query.platformIds,
+      apiKey,
+      limit,
+    );
+
+    let games = rawGames
+      .map(mapRawgGameToListItem)
+      .filter((g): g is GameListItem => g !== null);
+
+    if (shouldLocalizeNamesToZh()) {
+      games = await applyChineseDisplayNames(games);
+    }
+
+    return games;
+  }
+
+  async getGameListItem(gameId: string): Promise<GameListItem | null> {
+    const apiKey = requireRawgKey();
+    const raw = await fetchRawgGameById(gameId, apiKey);
+    if (!raw) return null;
+
+    let item = mapRawgGameToListItem(raw);
+    if (!item) return null;
+
+    if (shouldLocalizeNamesToZh()) {
+      const [localized] = await applyChineseDisplayNames([item]);
+      item = localized ?? item;
+    }
+
+    return item;
   }
 
   async getGameDetail(gameId: string) {

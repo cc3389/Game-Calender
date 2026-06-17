@@ -1,6 +1,6 @@
 import type { GameDetailMedia } from "@/entities/game/detail-types";
 import type { GameListItem } from "@/entities/game/types";
-import type { GameCatalogPort, ListReleasesQuery } from "../../port";
+import type { GameCatalogPort, ListReleasesQuery, SearchGamesQuery } from "../../port";
 
 /**
  * Twitch / IGDB 等数据源的占位实现。
@@ -13,6 +13,20 @@ export class TwitchGameCatalogAdapter implements GameCatalogPort {
     void query;
     throw new Error(
       "Twitch/IGDB catalog adapter is not implemented yet. Set GAME_CATALOG_PROVIDER=rawg or implement this adapter.",
+    );
+  }
+
+  async searchGames(query: SearchGamesQuery): Promise<GameListItem[]> {
+    void query;
+    throw new Error(
+      "Twitch/IGDB catalog adapter is not implemented yet. Set GAME_CATALOG_PROVIDER=rawg.",
+    );
+  }
+
+  async getGameListItem(gameId: string): Promise<GameListItem | null> {
+    void gameId;
+    throw new Error(
+      "Twitch/IGDB catalog adapter is not implemented yet. Set GAME_CATALOG_PROVIDER=rawg.",
     );
   }
 

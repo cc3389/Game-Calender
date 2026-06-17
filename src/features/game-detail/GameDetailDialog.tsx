@@ -10,17 +10,22 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useQuery } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
 import { zhCN } from "date-fns/locale";
+import { cn } from "@/shared/lib/cn";
 
 type GameDetailDialogProps = {
   game: GameListItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isWishlisted?: boolean;
+  onToggleWishlist?: (game: GameListItem) => void;
 };
 
 export function GameDetailDialog({
   game,
   open,
   onOpenChange,
+  isWishlisted = false,
+  onToggleWishlist,
 }: GameDetailDialogProps) {
   const detailQuery = useQuery({
     queryKey: ["game-detail", game?.id],
@@ -53,9 +58,25 @@ export function GameDetailDialog({
           )}
 
           <div className="p-5">
-            <Dialog.Title className="text-lg font-semibold text-zinc-50">
-              {game.name}
-            </Dialog.Title>
+            <div className="flex items-start justify-between gap-3">
+              <Dialog.Title className="text-lg font-semibold text-zinc-50">
+                {game.name}
+              </Dialog.Title>
+              {onToggleWishlist ? (
+                <button
+                  type="button"
+                  onClick={() => onToggleWishlist(game)}
+                  className={cn(
+                    "shrink-0 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors",
+                    isWishlisted
+                      ? "border-amber-500/50 bg-amber-500/15 text-amber-200"
+                      : "border-zinc-600 text-zinc-400 hover:border-amber-500/40 hover:text-amber-100",
+                  )}
+                >
+                  {isWishlisted ? "已关注" : "加入关注"}
+                </button>
+              ) : null}
+            </div>
             {game.nameOriginal && game.nameOriginal !== game.name ? (
               <p className="mt-1 text-sm text-zinc-500">{game.nameOriginal}</p>
             ) : null}

@@ -1,6 +1,6 @@
 # 游戏发售日历（Game Calender）
 
-跨平台游戏发售时间月历 Web 应用：按月浏览 PC / PlayStation / Xbox / Switch 等平台的新作发售日，支持平台筛选、中文译名、游戏详情（介绍、标签、截图与预告片）。
+跨平台游戏发售 **宣发专题页**：宽屏沉浸式背景 + **Hero 媒体轮播**（标题角标、截图/预告）、**发售日历** 与 **当日封面条带** 联动，详情卡片在日历下方；支持平台筛选与本地关注。无传统弹窗详情页。
 
 数据默认来自 [RAWG API](https://rawg.io/apidocs)，中文名与部分媒体内容通过 Steam 商店 API 增强。服务端采用**防腐层**，便于日后替换为 Twitch/IGDB 等数据源，而无需改动前端。
 
@@ -10,13 +10,15 @@
 
 | 模块 | 说明 |
 |------|------|
-| 月历视图 | 按日展示发售游戏；平台色点标识；EA 条目带 **EA** 标记 |
-| 月份导航 | 上/下月、回到今天；Popover 年月选择器快速跳转 |
-| 平台筛选 | PC、PS5、PS4、Xbox Series、Xbox One、Switch 等（RAWG 平台 ID） |
-| 游戏详情 | 发售日、平台、商店链接；中英文介绍；类型标签 |
-| 媒体轮播 | RAWG 截图 + Steam 截图/预告；HLS 视频播放（hls.js） |
-| 全屏看图 | Portal 全屏预览，左右切换截图，键盘 ← → / Esc |
-| 中文名称 | 可选 `GAME_NAME_LOCALE=zh`：组合标题解析 + Steam 简中店名匹配 |
+| 宣发展示 | Hero 媒体轮播（约 2:1、限高）；左上角标题；预告/截图不挡控件 |
+| 发售日历 | 筛选栏紧贴日历上方一行；选日驱动封面条带 |
+| 封面条带 | 当日游戏横向胶片；点击切换 Hero |
+| 心愿单 | 筛选栏「关注」面板；Hero 下方详情卡「加入关注」；「仅关注」筛选 |
+| URL 深链 | `?month=YYYY-MM&platforms=…&game=RAWG_ID` |
+| 月份导航 | 顶栏胶囊：上/下月、年月选择、今天 |
+| 平台筛选 | PC、PS5、Xbox Series、Switch 等（RAWG 平台 ID） |
+| 媒体 | RAWG 截图 + Steam 预告（hls.js）；Hero 内全屏看图 |
+| 中文名称 | 可选 `GAME_NAME_LOCALE=zh`：Steam 简中店名匹配 |
 
 ---
 
@@ -39,9 +41,12 @@ src/
 │   └── api/games/          # GET 按月列表、GET /:id 详情媒体
 ├── entities/game/          # 领域类型（GameListItem、详情 DTO）
 ├── features/               # 按功能划分 UI
-│   ├── calendar/           # 月历、工具栏、年月选择
-│   ├── game-detail/        # 详情弹窗、媒体轮播、HLS 播放器
-│   └── platform-filter/    # 平台筛选与图例
+│   ├── calendar/           # 月历逻辑、年月选择（工具组件）
+│   ├── showcase/           # 宣发页 Shell、Hero、日历皮肤、封面条带
+│   ├── game-detail/        # HLS 播放器、媒体轮播（供 Hero 复用）
+│   ├── platform-filter/    # 平台筛选
+│   ├── search/             # 游戏名称搜索
+│   └── wishlist/           # 本地关注列表
 ├── server/game-catalog/    # 防腐层与 RAWG/Twitch 适配器
 └── shared/                 # API 客户端、平台配置、通用组件
 ```

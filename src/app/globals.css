@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --background: #09090b;
+  --background: #030712;
   --foreground: #fafafa;
-  --accent: #8b5cf6;
+  --accent: #22d3ee;
 }
 
 @theme inline {
@@ -11,6 +11,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display);
 }
 
 body {
@@ -19,9 +20,435 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+.font-display {
+  font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+@keyframes hero-ken-burns {
+  from {
+    transform: scale(1.05);
+  }
+  to {
+    transform: scale(1.12);
+  }
+}
+
+.hero-ken-burns {
+  animation: hero-ken-burns 24s ease-in-out infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-ken-burns {
+    animation: none;
+  }
+}
+
+.hero-overlay-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+.hero-overlay-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.hero-overlay-scroll::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* 侧栏 / 列表纵向滚动：细轨、圆角滑块、hover 略亮 */
+.showcase-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(34, 211, 238, 0.35) transparent;
+  scrollbar-gutter: stable;
+}
+
+.showcase-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.showcase-scrollbar::-webkit-scrollbar-track {
+  margin-block: 4px;
+  border-radius: 9999px;
+  background: transparent;
+}
+
+.showcase-scrollbar::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 9999px;
+  background-clip: padding-box;
+  background-color: rgba(255, 255, 255, 0.14);
+}
+
+.showcase-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(34, 211, 238, 0.45);
+}
+
+.showcase-scrollbar::-webkit-scrollbar-thumb:active {
+  background-color: rgba(34, 211, 238, 0.6);
+}
+
+.ambient-cover-bloom {
+  filter: saturate(1.55) contrast(1.08) brightness(0.88);
+  opacity: 0.72;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-cover-bloom {
+    filter: saturate(1.25) contrast(1.05);
+    opacity: 0.55;
+  }
+}
+
+@keyframes showcase-hero-enter {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.showcase-hero-enter {
+  animation: showcase-hero-enter 0.85s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .showcase-hero-enter {
+    animation: none;
+  }
+}
+
+@keyframes showcase-part-enter {
+  from {
+    opacity: 0.55;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.showcase-part-enter {
+  animation: showcase-part-enter 260ms ease-out both;
+}
+
+.showcase-ambient-enter {
+  animation: showcase-ambient-enter 380ms ease-out both;
+}
+
+@keyframes showcase-ambient-enter {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .showcase-part-enter,
+  .showcase-ambient-enter {
+    animation: none;
+  }
+}
+
+/* ── 日历迷你封面：卡牌堆叠 / 悬停展开 / 翻光 ───────────── */
+.cal-cover {
+  transform: translateX(-50%) translateX(var(--stack-x, 0px))
+    rotate(var(--stack-rot, 0deg));
+  transition:
+    transform 320ms cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 220ms ease,
+    filter 220ms ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  will-change: transform;
+  cursor: pointer;
+}
+
+/* 整格悬停或当前选中日：迷你封面展开成一排 */
+.group\/cell:hover .cal-cover,
+.cal-cover.is-expanded {
+  transform: translateX(-50%) translateX(var(--fan-x, 0px)) translateY(-2px)
+    rotate(0deg);
+}
+
+/* 翻光高亮（斜向扫过） */
+.cal-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 32%,
+    rgba(255, 255, 255, 0.5) 48%,
+    transparent 64%
+  );
+  transform: translateX(-130%);
+  transition: transform 650ms ease;
+  pointer-events: none;
+}
+
+/* 单张悬停：抬升 + 放大 + 描边，盖过同格其它卡（须置于群组规则之后以胜出） */
+.cal-cover:hover {
+  transform: translateX(-50%) translateX(var(--fan-x, 0px)) translateY(-10px)
+    rotate(0deg) scale(1.22);
+  z-index: 60 !important;
+  filter: brightness(1.12) saturate(1.08);
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(34, 211, 238, 0.55);
+}
+
+.cal-cover:hover::after {
+  transform: translateX(130%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cal-cover,
+  .cal-cover::after {
+    transition: none;
+  }
+  .cal-cover:hover {
+    transform: translateX(-50%) translateX(var(--fan-x, 0px)) scale(1.1);
+  }
+  .cal-cover.is-picked {
+    animation: none;
+  }
+}
+
+/* ── 发售日历：任务板 / 战利品格 ─────────────────────────── */
+.cal-board-frame {
+  position: relative;
+}
+
+.cal-board-frame::before,
+.cal-board-frame::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  z-index: 20;
+  width: 12px;
+  height: 12px;
+  border-color: rgba(34, 211, 238, 0.35);
+  border-style: solid;
+}
+
+.cal-board-frame::before {
+  top: 6px;
+  left: 6px;
+  border-width: 2px 0 0 2px;
+}
+
+.cal-board-frame::after {
+  top: 6px;
+  right: 6px;
+  border-width: 2px 2px 0 0;
+}
+
+.cal-board-header {
+  position: relative;
+}
+
+.cal-board-grid {
+  position: relative;
+}
+
+.cal-day-slot {
+  background: linear-gradient(165deg, rgb(9 9 11 / 0.95) 0%, rgb(3 7 18 / 0.98) 100%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.04);
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 220ms ease,
+    filter 220ms ease;
+}
+
+.cal-day-slot--ghost {
+  opacity: 0.22;
+}
+
+.cal-day-slot--empty:hover {
+  background: rgb(24 24 27 / 0.85);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+.cal-day-slot--loot {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.07),
+    inset 0 -8px 16px rgb(34 211 238 / 0.04);
+}
+
+.cal-day-slot--loot::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgb(34 211 238 / 0.08) 50%,
+    transparent 60%
+  );
+  transition: opacity 300ms ease;
+}
+
+.group\/cell:hover.cal-day-slot--loot::before {
+  opacity: 1;
+  animation: cal-slot-shimmer 1.2s ease-out;
+}
+
+.cal-day-slot--hot {
+  box-shadow:
+    inset 0 0 0 1px rgb(251 191 36 / 0.22),
+    inset 0 -10px 20px rgb(251 191 36 / 0.06);
+}
+
+.cal-day-slot--selected {
+  animation: cal-slot-pulse 2.2s ease-in-out infinite;
+  filter: saturate(1.08);
+}
+
+.cal-day-slot--today:not(.cal-day-slot--selected) {
+  box-shadow: inset 0 0 0 1px rgb(167 139 250 / 0.35);
+}
+
+.cal-day-badge {
+  color: rgb(161 161 170);
+}
+
+.cal-day-badge--active {
+  background: rgb(34 211 238 / 0.35);
+  color: rgb(236 254 255);
+  box-shadow: 0 0 10px rgb(34 211 238 / 0.25);
+}
+
+.cal-day-badge--today {
+  background: rgb(139 92 246 / 0.28);
+  color: rgb(237 233 254);
+}
+
+.cal-day-badge--loot {
+  background: rgb(0 0 0 / 0.45);
+  color: rgb(228 228 231);
+  backdrop-filter: blur(2px);
+}
+
+.cal-loot-more {
+  background: linear-gradient(135deg, rgb(251 191 36 / 0.9), rgb(245 158 11 / 0.85));
+  box-shadow: 0 0 8px rgb(251 191 36 / 0.45);
+  color: rgb(24 24 27);
+}
+
+.cal-today-ping {
+  animation: cal-today-ping 2s ease-out infinite;
+  box-shadow: 0 0 0 0 rgb(167 139 250 / 0.7);
+}
+
+.cal-wishlist-star {
+  animation: cal-star-twinkle 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgb(251 191 36 / 0.55));
+}
+
+@keyframes cal-cell-deal {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.cal-cell-deal {
+  animation: cal-cell-deal 420ms cubic-bezier(0.22, 1.15, 0.36, 1) both;
+}
+
+@keyframes cal-slot-pulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 0 0 0 2px rgb(34 211 238 / 0.65),
+      0 0 18px rgb(34 211 238 / 0.15);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 2px rgb(34 211 238 / 0.95),
+      0 0 28px rgb(34 211 238 / 0.32);
+  }
+}
+
+@keyframes cal-slot-shimmer {
+  from {
+    transform: translateX(-30%);
+  }
+  to {
+    transform: translateX(30%);
+  }
+}
+
+@keyframes cal-today-ping {
+  0% {
+    box-shadow: 0 0 0 0 rgb(167 139 250 / 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgb(167 139 250 / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgb(167 139 250 / 0);
+  }
+}
+
+@keyframes cal-star-twinkle {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.cal-cover.is-picked {
+  animation: cal-cover-float 2.8s ease-in-out infinite;
+  box-shadow:
+    0 4px 12px rgb(0 0 0 / 0.55),
+    0 0 12px rgb(34 211 238 / 0.35);
+}
+
+@keyframes cal-cover-float {
+  0%,
+  100% {
+    transform: translateX(-50%) translateX(var(--fan-x, 0px)) translateY(-2px)
+      rotate(0deg);
+  }
+  50% {
+    transform: translateX(-50%) translateX(var(--fan-x, 0px)) translateY(-6px)
+      rotate(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cal-cell-deal,
+  .cal-day-slot--selected,
+  .cal-today-ping,
+  .cal-wishlist-star,
+  .group\/cell:hover.cal-day-slot--loot::before {
+    animation: none;
+  }
+  .cal-day-slot--loot::before {
+    opacity: 0.5;
+  }
 }

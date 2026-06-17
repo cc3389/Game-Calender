@@ -4,8 +4,10 @@ import { addMonths, format, startOfMonth, subMonths } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import { useCallback, useMemo, useState } from "react";
 
-export function useCalendarMonth(initial = new Date()) {
-  const [viewDate, setViewDate] = useState(() => startOfMonth(initial));
+export function useCalendarMonth(initial?: Date) {
+  const [viewDate, setViewDate] = useState(() =>
+    startOfMonth(initial ?? new Date()),
+  );
 
   const monthKey = useMemo(
     () => format(viewDate, "yyyy-MM"),

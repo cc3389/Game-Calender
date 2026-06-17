@@ -36,6 +36,7 @@ export async function fetchGamesByMonth(
 export type FetchGameDetailResponse = {
   provider: string;
   detail: GameDetailMedia;
+  game: GameListItem | null;
 };
 
 export async function fetchGameDetail(
@@ -56,4 +57,43 @@ export async function fetchGameDetail(
   }
 
   return data as FetchGameDetailResponse;
+}
+
+export type SearchGamesResponse = {
+  query: string;
+  provider: string;
+  games: GameListItem[];
+};
+
+export async function searchGames(
+  query: string,
+  platformIds: number[],
+): Promise<SearchGamesResponse> {
+  const params = new URLSearchParams({ q: query });
+  if (platformIds.length > 0) {
+    params.set("platforms", platformIds.join(","));
+  }
+
+  const res = await fetch(`/api/games/search?${params.toString()}`);
+  const data: unknown = await res.json();
+
+  if (!res.ok) {
+    const err =
+      typeof data === "object" &&
+      data !== null &&
+      "error" in data &&
+      typeof (data as { error: unknown }).error === "string"
+        ? (data as { error: string }).error
+        : `Request failed (${res.status})`;
+    throw new Error(err);
+  }
+
+  return data as SearchGamesResponse;
+}
+
+export async function fetchGameListItem(
+  gameId: string,
+): Promise<GameListItem | null> {
+  const res = await fetchGameDetail(gameId);
+  return res.game;
 }
