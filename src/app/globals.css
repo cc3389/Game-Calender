@@ -146,6 +146,72 @@ body {
   animation: showcase-ambient-enter 380ms ease-out both;
 }
 
+.showcase-hero-frame {
+  aspect-ratio: 2 / 1;
+  max-height: 38vh;
+  min-height: 9.5rem;
+}
+
+@media (min-width: 640px) {
+  .showcase-hero-frame {
+    min-height: 10.5rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .showcase-hero-frame {
+    aspect-ratio: 21 / 9;
+    max-height: 46vh;
+    min-height: 12.5rem;
+  }
+
+  .ambient-scrim-vignette {
+    background: radial-gradient(
+      ellipse 52rem 88% at 50% 40%,
+      #020617 0%,
+      #020617 32%,
+      transparent 88%
+    );
+  }
+
+  .group\/cell:hover .cal-cover,
+  .cal-cover.is-expanded {
+    transform: translateX(-50%) translateX(calc(var(--fan-x, 0px) * 1.08))
+      translateY(-2px) rotate(0deg);
+  }
+}
+
+@media (min-width: 1536px) {
+  .showcase-hero-frame {
+    max-height: 52vh;
+    min-height: 14rem;
+  }
+
+  .ambient-scrim-vignette {
+    background: radial-gradient(
+      ellipse 64rem 90% at 50% 38%,
+      #020617 0%,
+      #020617 28%,
+      transparent 90%
+    );
+  }
+
+  .group\/cell:hover .cal-cover,
+  .cal-cover.is-expanded {
+    transform: translateX(-50%) translateX(calc(var(--fan-x, 0px) * 1.15))
+      translateY(-2px) rotate(0deg);
+  }
+}
+
+.ambient-scrim-vignette {
+  background: radial-gradient(
+    ellipse 36rem 88% at 50% 40%,
+    #020617 0%,
+    #020617 36%,
+    transparent 84%
+  );
+}
+
 @keyframes showcase-ambient-enter {
   from {
     opacity: 0.35;
